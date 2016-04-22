@@ -1,0 +1,23 @@
+---
+  - name: Remove old Docker installations
+    yum: name=docker state=removed
+  - name: Copy docker.repo inside yum.repos.d folder
+    copy: src=docker.repo dest=/etc/yum.repos.d owner=root group=root mode=0600
+  - name: Install docker-engine package
+    yum: name=docker-engine state=latest
+    ignore_errors: yes
+  - name: Create docker systemd folder (for env variables)
+    file: path=/etc/systemd/system/docker.service.d state=directory mode=0700
+  - name: Create docker certs folder
+    file: path=/etc/docker/certs.d/yourcompanyregistry.domain.com state=directory mode=0700
+  - name: Copy proxy configuration
+    copy: src=http-proxy.conf dest=/etc/systemd/system/docker.service.d mode=0600
+  - name: Copy certificate in CA trust
+    copy: src=docker.crt dest=/etc/pki/ca-trust/source/anchors mode=0600
+    notify: 
+      - update trusted ca
+  - name: Copy certificate for Docker
+    copy: src=docker.crt dest=/etc/docker/certs.d/yourcompanyregistry.domain.com mode=0600
+    notify: 
+      - reload systemd
+      - restart docker-engine
