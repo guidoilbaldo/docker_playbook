@@ -1,7 +1,0 @@
----
-  - name: reload systemd
-    command: /bin/systemctl daemon-reload
-  - name: restart docker-engine
-    service: name=docker state=restarted enabled=on
-  - name: update trusted ca
-    shell: /bin/update-ca-trust
